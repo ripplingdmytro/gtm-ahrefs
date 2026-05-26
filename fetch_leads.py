@@ -169,13 +169,15 @@ def pick_vendor_interactively(slugs: list[str]) -> str:
             print()
             raise SystemExit("Cancelled.") from None
 
+        if not raw:
+            continue
         if raw == "0":
             raise SystemExit("Cancelled.")
         if raw.isdigit():
             choice = int(raw)
             if 1 <= choice <= len(options):
                 return options[choice - 1][0]
-        print("  Invalid choice — try again.")
+        print("  Invalid choice — enter a number from the menu.")
 
 
 def make_run_id(when: datetime) -> str:
@@ -419,7 +421,7 @@ def main() -> None:
 
     label = _vendor_label(vendor, vendor_slug)
     print()
-    print(f"  Getting up to {limit} likely {label} customers from Ahrefs…")
+    print(f"  Getting up to {limit} {label} customers from Ahrefs…")
     print()
     backlinks = fetch_backlinks(
         api_key, vendor, limit=limit, history=args.history
