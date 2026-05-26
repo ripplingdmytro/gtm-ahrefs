@@ -143,6 +143,10 @@ def vendors_for_menu(slugs: list[str]) -> list[tuple[str, dict[str, Any]]]:
     return options
 
 
+def _vendor_label(vendor: dict[str, Any], slug: str) -> str:
+    return str(vendor.get("display_name") or slug.replace("-", " ").title())
+
+
 def pick_vendor_interactively(slugs: list[str]) -> str:
     if not slugs:
         raise SystemExit(f"No vendor configs found in {VENDORS_DIR}/")
@@ -150,7 +154,7 @@ def pick_vendor_interactively(slugs: list[str]) -> str:
     options = vendors_for_menu(slugs)
 
     print()
-    print("  Which vendor signal do you want to hunt?")
+    print("  Pick a competitor stack to hunt:")
     print()
     for index, (_, cfg) in enumerate(options, start=1):
         print(f"    {index}. {cfg.get('display_name', '')}")
@@ -160,7 +164,7 @@ def pick_vendor_interactively(slugs: list[str]) -> str:
 
     while True:
         try:
-            raw = input("  Enter number: ").strip()
+            raw = input("  > ").strip()
         except (EOFError, KeyboardInterrupt):
             print()
             raise SystemExit("Cancelled.") from None
@@ -413,11 +417,10 @@ def main() -> None:
     fetched_at = when.strftime("%Y-%m-%dT%H:%M:%SZ")
     output_path = args.output or default_output_path(vendor_slug, run_id, when)
 
-    order_by = vendor.get("order_by", "domain_rating_source:desc")
-    print(
-        f"Fetching up to {limit} domains for {vendor_slug} "
-        f"(ordered by {order_by})..."
-    )
+    label = _vendor_label(vendor, vendor_slug)
+    print()
+    print(f"  Getting up to {limit} likely {label} customers from Ahrefs…")
+    print()
     backlinks = fetch_backlinks(
         api_key, vendor, limit=limit, history=args.history
     )
@@ -441,15 +444,17 @@ def main() -> None:
     dropped_require = before - len(rows)
 
     write_csv(output_path, rows)
-    msg = f"Wrote {len(rows)} rows to {output_path}"
+    msg = f"  Done — {len(rows)} {label} leads saved to {output_path}"
     parts: list[str] = []
     if dropped_block:
-        parts.append(f"{dropped_block} blocklist")
+        parts.append(f"{dropped_block} noisy referrers")
     if dropped_require:
-        parts.append(f"{dropped_require} url_from require")
+        parts.append(f"{dropped_require} non-careers pages")
     if parts:
-        msg += f" ({', '.join(parts)} dropped)"
+        msg += f" ({', '.join(parts)} filtered out)"
+    print()
     print(msg)
+    print()
 
 
 if __name__ == "__main__":
