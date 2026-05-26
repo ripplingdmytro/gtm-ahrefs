@@ -1,0 +1,29 @@
+{
+  "vendor_slug": "deel",
+  "display_name": "Deel",
+  "target": "jobs.deel.com",
+  "mode": "subdomains",
+  "aggregation": "1_per_domain",
+  "url_to_contains": "jobs.deel.com",
+  "domain_rating_min": 20,
+  "traffic_domain_min": 1000,
+  "include_defaults": true,
+  "url_to_exclude": [
+    "www.deel.com",
+    "deel.com/careers",
+    "deel.com/about",
+    "app.deel.com",
+    "help.deel.com",
+    "support.deel.com",
+    "investors",
+    "press"
+  ],
+  "url_from_exclude": [
+    "jobs.ashbyhq.com/deel",
+    "ashbyhq.com/deel",
+    "deel.com/careers"
+  ],
+  "select": "url_from,url_to,root_name_source,domain_rating_source,traffic_domain,title",
+  "order_by": "domain_rating_source:desc",
+  "default_limit": 100
+}
