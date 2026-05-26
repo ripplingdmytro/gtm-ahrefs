@@ -1,4 +1,5 @@
 *.csv
+out/
 .env
 __pycache__/
 .venv/

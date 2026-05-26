@@ -1,0 +1,21 @@
+{
+  "vendor_slug": "gusto",
+  "display_name": "Gusto",
+  "target": "gusto.com",
+  "mode": "subdomains",
+  "aggregation": "1_per_domain",
+  "url_to_contains": "app.gusto.com",
+  "domain_rating_min": 20,
+  "traffic_domain_min": 1000,
+  "include_defaults": true,
+  "url_to_exclude": [
+    "www.gusto.com",
+    "investors",
+    "press",
+    "support.gusto.com"
+  ],
+  "url_from_exclude": [],
+  "select": "url_from,url_to,root_name_source,domain_rating_source,traffic_domain,title",
+  "order_by": "domain_rating_source:desc",
+  "default_limit": 100
+}

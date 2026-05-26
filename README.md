@@ -1,50 +1,83 @@
 # gtm-ahrefs
 
-Lead gen via Ahrefs: find companies that publicly link to HR vendor surfaces (starting with ADP Workforce Now).
+Lead gen via Ahrefs: find companies that publicly link to HR vendor surfaces (Workday, ADP, Gusto, etc.).
 
 Repo: https://github.com/ripplingdmytro/gtm-ahrefs
 
-## ADP Workforce Now
-
-Local script to find companies that publicly link to ADP Workforce Now (`workforcenow.adp.com`) — a strong ATS / HR stack signal.
-
 ## Setup
 
-```bash
-export AHREFS_API_KEY='your-key-here'
-```
+1. Copy `.env.example` to `.env`
+2. Paste your Ahrefs API key after `AHREFS_API_KEY=` (one line, no quotes)
 
-Requires Python 3.10+ (stdlib only).
+`.env` is gitignored.
 
 ## Run
 
-Default test run (5 rows, sorted by highest domain rating):
+**Interactive menu** (pick ADP, Workday, Gusto, …):
 
 ```bash
-python fetch_adp_workforcenow.py
+python3 fetch_leads.py
 ```
 
-Custom limit and output file:
+Skip the menu:
 
 ```bash
-python fetch_adp_workforcenow.py --limit 25 --output adp_leads.csv
+python3 fetch_leads.py --vendor adp-workforcenow
 ```
 
-## Output CSV
+List vendors:
+
+```bash
+python3 fetch_leads.py --list-vendors
+```
+
+Small test:
+
+```bash
+python3 fetch_leads.py --vendor adp-workforcenow --limit 5
+```
+
+## Output paths
+
+Each run writes a **new** file (nothing overwritten except `latest.csv`):
+
+```text
+out/adp-workforcenow/2026-05-26/20260526-143022.csv
+out/adp-workforcenow/latest.csv
+```
+
+- **Folders** use `/` as separators (normal on disk).
+- **Names** use dashes only: `adp-workforcenow`, `2026-05-26`, `20260526-143022` — no slashes inside filenames or slug values (pipeline-friendly).
+
+Override path manually:
+
+```bash
+python3 fetch_leads.py --vendor adp-workforcenow --output ./my-export.csv
+```
+
+## CSV schema (same for every vendor)
 
 | Column | Description |
 |--------|-------------|
-| `company_domain` | Root domain of the linking company |
-| `vendor` | Fixed tag `adp_workforcenow` |
-| `url_from` | Page that links to Workforce Now |
-| `domain_rating_source` | Ahrefs DR of referring domain |
-| `traffic_domain` | Estimated monthly organic traffic (costs API units) |
+| `run_id` | e.g. `20260526-143022` |
+| `fetched_at` | UTC ISO timestamp |
+| `vendor_slug` | e.g. `adp-workforcenow` |
+| `company_domain` | Root domain of linking company |
+| `url_from` | Page with the link |
+| `url_to` | Target URL (Workforce Now, etc.) |
+| `domain_rating_source` | Ahrefs DR |
+| `traffic_domain` | Organic traffic estimate (10 API units/row) |
 | `title` | Referring page title |
 
-## API cost note
+## Add a vendor (Workday, Gusto, SAP, …)
 
-`traffic_domain` costs **10 units per row** in `select`. Keep `--limit` low while testing.
+Copy `vendors/adp-workforcenow.json` → `vendors/workday.json` (or similar), then edit:
 
-## Filters
+- `vendor_slug` (must match filename, use dashes)
+- `target`, `url_to_contains`, exclude lists, `order_by`
 
-See `build_where_filter()` in `fetch_adp_workforcenow.py` for the full Ahrefs `where` JSON (Workforce Now target URL, DR ≥ 20, traffic ≥ 1000, and exclude lists for noisy referrers/targets).
+No new script needed — one `fetch_leads.py` loads the config.
+
+## API cost
+
+`traffic_domain` in `select` costs **10 units per row** (~1,000 units for 100 rows).
