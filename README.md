@@ -1,4 +1,10 @@
-# Lead gen: vendor signals via Ahrefs
+# gtm-ahrefs
+
+Lead gen via Ahrefs: find companies that publicly link to HR vendor surfaces (starting with ADP Workforce Now).
+
+Repo: https://github.com/ripplingdmytro/gtm-ahrefs
+
+## ADP Workforce Now
 
 Local script to find companies that publicly link to ADP Workforce Now (`workforcenow.adp.com`) — a strong ATS / HR stack signal.
 
