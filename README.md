@@ -1,83 +1,62 @@
 # gtm-ahrefs
 
-Lead gen via Ahrefs: find companies that publicly link to HR vendor surfaces (Workday, ADP, Gusto, etc.).
+find companies that link to hr vendor sites (adp, workday, gusto, etc.) using ahrefs. each row = one website that links to that vendor’s portal.
 
-Repo: https://github.com/ripplingdmytro/gtm-ahrefs
+## setup
 
-## Setup
+```bash
+cp .env.example .env
+```
 
-1. Copy `.env.example` to `.env`
-2. Paste your Ahrefs API key after `AHREFS_API_KEY=` (one line, no quotes)
+open `.env` and paste your ahrefs api key after `AHREFS_API_KEY=`
 
-`.env` is gitignored.
-
-## Run
-
-**Interactive menu** (pick ADP, Workday, Gusto, …):
+## run
 
 ```bash
 python3 fetch_leads.py
 ```
 
-Skip the menu:
+pick a vendor from the menu. default fetch = 100 companies.
+
+other useful commands:
 
 ```bash
-python3 fetch_leads.py --vendor adp-workforcenow
-```
-
-List vendors:
-
-```bash
+python3 fetch_leads.py --vendor adp-workforcenow   # skip menu
+python3 fetch_leads.py --limit 5                   # cheap test
 python3 fetch_leads.py --list-vendors
 ```
 
-Small test:
+## output
 
-```bash
-python3 fetch_leads.py --vendor adp-workforcenow --limit 5
-```
-
-## Output paths
-
-Each run writes a **new** file (nothing overwritten except `latest.csv`):
+each run creates a new csv (old runs are kept):
 
 ```text
 out/adp-workforcenow/2026-05-26/20260526-143022.csv
-out/adp-workforcenow/latest.csv
+out/adp-workforcenow/latest.csv                    # most recent only
 ```
 
-- **Folders** use `/` as separators (normal on disk).
-- **Names** use dashes only: `adp-workforcenow`, `2026-05-26`, `20260526-143022` — no slashes inside filenames or slug values (pipeline-friendly).
+load the dated files into snowflake. skip `latest.csv` for the warehouse.
 
-Override path manually:
+## csv columns
 
-```bash
-python3 fetch_leads.py --vendor adp-workforcenow --output ./my-export.csv
-```
-
-## CSV schema (same for every vendor)
-
-| Column | Description |
-|--------|-------------|
-| `run_id` | e.g. `20260526-143022` |
-| `fetched_at` | UTC ISO timestamp |
+| column | what it is |
+|--------|------------|
+| `run_id` | this fetch (e.g. `20260526-143022`) |
+| `fetched_at` | when (utc) |
 | `vendor_slug` | e.g. `adp-workforcenow` |
-| `company_domain` | Root domain of linking company |
-| `url_from` | Page with the link |
-| `url_to` | Target URL (Workforce Now, etc.) |
-| `domain_rating_source` | Ahrefs DR |
-| `traffic_domain` | Organic traffic estimate (10 API units/row) |
-| `title` | Referring page title |
+| `company_domain` | site that linked to the vendor |
+| `url_from` | page with the link (check this for qa) |
+| `url_to` | vendor portal url (`cid=` = adp tenant id) |
+| `domain_rating_source` | ahrefs dr |
+| `traffic_domain` | traffic estimate |
+| `title` | page title |
 
-## Add a vendor (Workday, Gusto, SAP, …)
+**note:** `1_per_domain` = one row per *linking* site, not per adp customer. same customer can appear twice if two sites link to the same portal. dedupe on `cid` in snowflake.
 
-Copy `vendors/adp-workforcenow.json` → `vendors/workday.json` (or similar), then edit:
+## add a vendor
 
-- `vendor_slug` (must match filename, use dashes)
-- `target`, `url_to_contains`, exclude lists, `order_by`
+copy `vendors/adp-workforcenow.json` → `vendors/your-vendor.json`, edit filters, run again. it shows up in the menu automatically.
 
-No new script needed — one `fetch_leads.py` loads the config.
+## cost
 
-## API cost
-
-`traffic_domain` in `select` costs **10 units per row** (~1,000 units for 100 rows).
+`traffic_domain` costs ~10 ahrefs units per row (~1,000 units for 100 rows).
