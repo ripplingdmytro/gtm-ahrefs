@@ -4,7 +4,7 @@ Fetch technographic leads from Ahrefs backlinks (one vendor config per run).
 
 Usage:
   python3 fetch_leads.py              # interactive menu
-  python3 fetch_leads.py --vendor adp-workforcenow
+  python3 fetch_leads.py --vendor adp
   python3 fetch_leads.py --list-vendors
 """
 
@@ -255,7 +255,7 @@ def parse_args(vendor_slugs: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--vendor",
         metavar="SLUG",
-        help="Skip menu and use this vendor (e.g. adp-workforcenow)",
+        help="Skip menu and use this vendor slug (e.g. adp)",
     )
     parser.add_argument(
         "--list-vendors",
