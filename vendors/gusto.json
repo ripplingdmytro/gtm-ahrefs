@@ -1,20 +1,27 @@
 {
   "vendor_slug": "gusto",
   "display_name": "Gusto",
-  "target": "gusto.com",
+  "target": "jobs.gusto.com",
   "mode": "subdomains",
   "aggregation": "1_per_domain",
-  "url_to_contains": "app.gusto.com",
+  "url_to_contains": "jobs.gusto.com/boards",
   "domain_rating_min": 20,
   "traffic_domain_min": 1000,
   "include_defaults": true,
   "url_to_exclude": [
+    "app.gusto.com",
     "www.gusto.com",
+    "gusto.com/about",
+    "support.gusto.com",
+    "help.gusto.com",
     "investors",
-    "press",
-    "support.gusto.com"
+    "press"
   ],
-  "url_from_exclude": [],
+  "url_from_exclude": [
+    "greenhouse.io",
+    "job-boards.greenhouse.io",
+    "gusto.com/about/careers"
+  ],
   "select": "url_from,url_to,root_name_source,domain_rating_source,traffic_domain,title",
   "order_by": "domain_rating_source:desc",
   "default_limit": 100

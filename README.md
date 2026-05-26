@@ -56,6 +56,8 @@ newest run: `ls -t out/adp-workforcenow/*/*.csv | head -1`
 
 copy `vendors/adp-workforcenow.json` → `vendors/your-vendor.json`, edit filters, run again. it shows up in the menu automatically.
 
+**gusto** targets company career boards at `jobs.gusto.com/boards/…` (referrers = customer websites linking to their board).
+
 ## cost
 
 `traffic_domain` costs ~10 ahrefs units per row (~1,000 units for 100 rows).
