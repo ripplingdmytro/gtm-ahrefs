@@ -98,7 +98,11 @@ referring sites classified as education or government are excluded:
 1. ahrefs `tld_class_source = normal` (drops edu/gov tld class)
 2. `root_name_source` must not end with common public-sector suffixes (`.edu`, `.gov`, `.gov.uk`, `.ac.uk`, `.edu.au`, `.gov.au`, `.go.jp`, …) — see `root_name_suffix_exclude` in `_defaults.json`
 
-### shared blocklist (~140 tokens)
+### careers-ish referrers only
+
+`url_from_require_any` in `_defaults.json` requires the referring page URL to contain at least one hiring-related token (e.g. `career`, `/jobs`, `employ`, `benefits`). This drops news articles, restaurant reviews, and product pages that accidentally link to a vendor portal.
+
+### shared blocklist (~200 tokens)
 
 `url_from_exclude` in `_defaults.json` drops noisy **referrers**, including:
 

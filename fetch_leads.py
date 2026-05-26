@@ -27,6 +27,9 @@ ENV_FILE = SCRIPT_DIR / ".env"
 VENDORS_DIR = SCRIPT_DIR / "vendors"
 OUT_DIR = SCRIPT_DIR / "out"
 
+# Ahrefs puts the where filter in the request; too many exclude clauses blows the header limit.
+AHREFS_URL_FROM_EXCLUDE_CAP = 200
+
 CSV_COLUMNS = (
     "run_id",
     "fetched_at",
@@ -80,8 +83,18 @@ def build_where_filter(vendor: dict[str, Any]) -> dict[str, Any]:
     ]
     for token in vendor.get("url_to_exclude", []):
         clauses.append(_not_substring("url_to_plain", token))
-    for token in vendor.get("url_from_exclude", []):
+    for token in vendor.get("url_from_exclude", [])[:AHREFS_URL_FROM_EXCLUDE_CAP]:
         clauses.append(_not_substring("url_from_plain", token))
+    hints = defaults.get("url_from_require_any", [])
+    if hints:
+        clauses.append(
+            {
+                "or": [
+                    {"field": "url_from_plain", "is": ["substring", hint]}
+                    for hint in hints
+                ]
+            }
+        )
     return {"and": clauses}
 
 
@@ -229,6 +242,19 @@ def fetch_backlinks(
     return payload.get("backlinks") or []
 
 
+def _url_from_blocked(url_from: str, exclude_tokens: list[str]) -> bool:
+    plain = url_from.lower()
+    return any(token.lower() in plain for token in exclude_tokens)
+
+
+def filter_rows_by_url_from(
+    rows: list[dict[str, Any]], exclude_tokens: list[str]
+) -> list[dict[str, Any]]:
+    if not exclude_tokens:
+        return rows
+    return [r for r in rows if not _url_from_blocked(r.get("url_from") or "", exclude_tokens)]
+
+
 def rows_for_csv(
     backlinks: list[dict[str, Any]],
     *,
@@ -337,8 +363,15 @@ def main() -> None:
         run_id=run_id,
         fetched_at=fetched_at,
     )
+    exclude = vendor.get("url_from_exclude", [])
+    before = len(rows)
+    rows = filter_rows_by_url_from(rows, exclude)
+    dropped = before - len(rows)
     write_csv(output_path, rows)
-    print(f"Wrote {len(rows)} rows to {output_path}")
+    msg = f"Wrote {len(rows)} rows to {output_path}"
+    if dropped:
+        msg += f" ({dropped} dropped by url_from blocklist)"
+    print(msg)
 
 
 if __name__ == "__main__":

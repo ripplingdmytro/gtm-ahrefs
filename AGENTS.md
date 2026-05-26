@@ -44,7 +44,7 @@ out/                    → immutable run csvs
 
 - `tld_class_source = normal` (drops ahrefs edu/gov class)
 - `root_name_suffix_exclude` — `.edu`, `.gov`, `.gov.uk`, `.ac.uk`, …
-- ~140 `url_from_exclude` tokens — media, job boards, social, free hosts (see `_defaults.json`)
+- ~200 `url_from_exclude` tokens + `url_from_require_any` (careers/jobs path on referrer) — see `_defaults.json`
 
 edit blocklist: **`vendors/_defaults.json`** only (unless vendor-specific `url_from_exclude` in `{slug}.json`).
 
@@ -84,7 +84,7 @@ add vendor = new `vendors/{slug}.json`; menu picks it up via `display_name` + `m
 
 - parse `tenant_id` column in python (adp `cid`, etc.) before csv export
 - workday filter hardening (`myworkdayjobs.com` and/or exclude login/learning `url_to`)
-- optional post-fetch `--strict` filter (careers path on `url_from`)
+- optional post-fetch `--strict` filter (tighter careers path on `url_from` than `url_from_require_any`)
 - snowflake load + dbt models for dedupe/enrichment
 - do **not** add `examples/` sample csvs unless user asks (they rejected this)
 - do **not** reintroduce `latest.csv`
