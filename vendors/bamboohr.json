@@ -24,5 +24,5 @@
   ],
   "select": "url_from,url_to,root_name_source,domain_rating_source,traffic_domain,title",
   "order_by": "domain_rating_source:desc",
-  "default_limit": 100
+  "default_limit": 500
 }

@@ -14,6 +14,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -37,6 +38,7 @@ CSV_COLUMNS = (
     "company_domain",
     "url_from",
     "url_to",
+    "tenant_id",
     "domain_rating_source",
     "traffic_domain",
     "title",
@@ -85,7 +87,9 @@ def build_where_filter(vendor: dict[str, Any]) -> dict[str, Any]:
         clauses.append(_not_substring("url_to_plain", token))
     for token in vendor.get("url_from_exclude", [])[:AHREFS_URL_FROM_EXCLUDE_CAP]:
         clauses.append(_not_substring("url_from_plain", token))
-    hints = defaults.get("url_from_require_any", [])
+    hints = vendor.get("url_from_require_any")
+    if hints is None:
+        hints = defaults.get("url_from_require_any", [])
     if hints:
         clauses.append(
             {
@@ -255,6 +259,64 @@ def filter_rows_by_url_from(
     return [r for r in rows if not _url_from_blocked(r.get("url_from") or "", exclude_tokens)]
 
 
+def _url_from_matches_require(url_from: str, require_tokens: list[str]) -> bool:
+    if not require_tokens:
+        return True
+    plain = url_from.lower()
+    return any(token.lower() in plain for token in require_tokens)
+
+
+def filter_rows_by_url_from_require(
+    rows: list[dict[str, Any]], require_tokens: list[str]
+) -> list[dict[str, Any]]:
+    if not require_tokens:
+        return rows
+    return [
+        r
+        for r in rows
+        if _url_from_matches_require(r.get("url_from") or "", require_tokens)
+    ]
+
+
+def parse_tenant_id(vendor_slug: str, url_to: str) -> str:
+    """Best-effort tenant key from vendor portal url (for dedupe downstream)."""
+    if not url_to:
+        return ""
+    if vendor_slug == "workday":
+        match = re.search(r"[?&]t=([^&#]+)", url_to, re.I)
+        if match:
+            return urllib.parse.unquote(match.group(1))
+        match = re.search(
+            r"https?://([^.]+)\.(?:wd\d+\.)?myworkdayjobs\.com", url_to, re.I
+        )
+        if match:
+            return match.group(1).lower()
+        match = re.search(r"myworkday\.com/([^/?#]+)/d/", url_to, re.I)
+        if match:
+            tenant = match.group(1).lower()
+            if tenant not in ("www", "wday", "login", "authgwy") and not re.fullmatch(
+                r"wd\d+", tenant
+            ):
+                return tenant
+    elif vendor_slug == "adp":
+        match = re.search(r"[?&]cid=([^&#]+)", url_to, re.I)
+        if match:
+            return urllib.parse.unquote(match.group(1))
+    elif vendor_slug == "bamboohr":
+        match = re.search(r"https?://([^.]+)\.bamboohr\.com", url_to, re.I)
+        if match:
+            return match.group(1).lower()
+    elif vendor_slug == "gusto":
+        match = re.search(r"jobs\.gusto\.com/boards/([^/?#]+)", url_to, re.I)
+        if match:
+            return match.group(1)
+    elif vendor_slug == "deel":
+        match = re.search(r"jobs\.deel\.com/([^/?#]+)", url_to, re.I)
+        if match:
+            return match.group(1)
+    return ""
+
+
 def rows_for_csv(
     backlinks: list[dict[str, Any]],
     *,
@@ -264,6 +326,7 @@ def rows_for_csv(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for item in backlinks:
+        url_to = item.get("url_to") or ""
         rows.append(
             {
                 "run_id": run_id,
@@ -271,7 +334,8 @@ def rows_for_csv(
                 "vendor_slug": vendor_slug,
                 "company_domain": item.get("root_name_source") or "",
                 "url_from": item.get("url_from") or "",
-                "url_to": item.get("url_to") or "",
+                "url_to": url_to,
+                "tenant_id": parse_tenant_id(vendor_slug, url_to),
                 "domain_rating_source": item.get("domain_rating_source", ""),
                 "traffic_domain": item.get("traffic_domain", ""),
                 "title": item.get("title") or "",
@@ -336,7 +400,7 @@ def main() -> None:
         raise SystemExit(f"Unknown vendor {vendor_slug!r}. Available: {available}")
 
     vendor = load_vendor(vendor_slug)
-    limit = args.limit if args.limit is not None else vendor.get("default_limit", 100)
+    limit = args.limit if args.limit is not None else vendor.get("default_limit", 500)
 
     api_key = load_api_key()
     if not api_key:
@@ -363,14 +427,28 @@ def main() -> None:
         run_id=run_id,
         fetched_at=fetched_at,
     )
+    defaults = _load_shared_defaults()
     exclude = vendor.get("url_from_exclude", [])
+    require = vendor.get("url_from_require_any")
+    if require is None:
+        require = defaults.get("url_from_require_any", [])
+
     before = len(rows)
     rows = filter_rows_by_url_from(rows, exclude)
-    dropped = before - len(rows)
+    dropped_block = before - len(rows)
+    before = len(rows)
+    rows = filter_rows_by_url_from_require(rows, require)
+    dropped_require = before - len(rows)
+
     write_csv(output_path, rows)
     msg = f"Wrote {len(rows)} rows to {output_path}"
-    if dropped:
-        msg += f" ({dropped} dropped by url_from blocklist)"
+    parts: list[str] = []
+    if dropped_block:
+        parts.append(f"{dropped_block} blocklist")
+    if dropped_require:
+        parts.append(f"{dropped_require} url_from require")
+    if parts:
+        msg += f" ({', '.join(parts)} dropped)"
     print(msg)
 
 

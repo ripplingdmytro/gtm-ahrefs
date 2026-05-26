@@ -26,7 +26,7 @@ requires python 3.9+ (stdlib only).
 python3 fetch_leads.py
 ```
 
-interactive menu (largest → smallest competitor). default = **100** companies per run.
+interactive menu (largest → smallest competitor). default = **500** companies per run.
 
 | # | vendor | slug |
 |---|--------|------|
@@ -72,6 +72,7 @@ ls -t out/adp/*/*.csv | head -1
 | `company_domain` | **referring** root domain (who linked) |
 | `url_from` | page with the backlink — **qa this** |
 | `url_to` | vendor portal url (proof of stack) |
+| `tenant_id` | parsed customer key from `url_to` (e.g. workday `t=`, adp `cid=`) |
 | `domain_rating_source` | ahrefs dr of referrer |
 | `traffic_domain` | ahrefs traffic estimate of referrer |
 | `title` | referring page title |
@@ -161,7 +162,7 @@ out/                    # run csvs (dated paths)
 
 ## ahrefs cost
 
-`traffic_domain` in `select` costs **~10 units per row**. a 100-row run is roughly **~1,000 units** plus base request cost. use `--limit 5` while testing filters.
+`traffic_domain` in `select` costs **~10 units per row**. a 500-row run is roughly **~5,000 units** plus base request cost. use `--limit 5` while testing filters.
 
 ## snowflake (recommended next steps)
 

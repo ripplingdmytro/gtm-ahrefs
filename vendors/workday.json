@@ -12,10 +12,38 @@
     "www.workday.com",
     "investors",
     "press",
-    "blog.workday.com"
+    "blog.workday.com",
+    "/login",
+    "/learning",
+    "authgwy",
+    "workday.com/en-us/company",
+    "workday.com/ja-jp/company"
   ],
-  "url_from_exclude": [],
+  "url_from_require_any": [
+    "career",
+    "employ",
+    "hiring",
+    "recruit",
+    "/jobs",
+    "/job/",
+    "opening",
+    "vacanc",
+    "work-with-us",
+    "join-us",
+    "work-for-us",
+    "join-our",
+    "life-at-"
+  ],
+  "url_from_exclude": [
+    "blackhat.com",
+    "framer.app/interview-questions",
+    "hermanmiller.com/research",
+    "employee-separation",
+    "theladders.com",
+    "credly.com",
+    "workday.com/"
+  ],
   "select": "url_from,url_to,root_name_source,domain_rating_source,traffic_domain,title",
   "order_by": "domain_rating_source:desc",
-  "default_limit": 100
+  "default_limit": 500
 }

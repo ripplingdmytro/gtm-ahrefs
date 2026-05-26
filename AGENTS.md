@@ -31,7 +31,7 @@ out/                    → immutable run csvs
 1. user runs `python3 fetch_leads.py` (menu) or `--vendor adp`
 2. script loads `vendors/{slug}.json`, merges `_defaults.json` into `url_from_exclude`
 3. builds ahrefs `where` json: icp rules + vendor `url_to_contains` + dr/traffic mins
-4. `GET /v3/site-explorer/all-backlinks`, `aggregation=1_per_domain`, default `limit=100`
+4. `GET /v3/site-explorer/all-backlinks`, `aggregation=1_per_domain`, default `limit=500`
 5. writes csv with `run_id`, `fetched_at`, `vendor_slug`, backlink fields
 
 **ahrefs semantics (critical)**
@@ -78,12 +78,12 @@ add vendor = new `vendors/{slug}.json`; menu picks it up via `display_name` + `m
 - sorting by `domain_rating_source:desc` still favors large referrers; filters help but aren’t perfect
 - workday `myworkday.com` target is broad (login/learning/outage urls) — discussed tightening to `myworkdayjobs.com` later
 - media/job-board rows reduced by blocklist; **tenant dedupe in snowflake** is still required for outreach
-- ahrefs may cap rows per request on some plans — watch if `--limit 100` returns fewer
+- ahrefs may cap rows per request on some plans — watch if `--limit 500` returns fewer
 
 **not done / sensible next steps**
 
-- parse `tenant_id` column in python (adp `cid`, etc.) before csv export
-- workday filter hardening (`myworkdayjobs.com` and/or exclude login/learning `url_to`)
+- workday: `tenant_id` in csv; stricter `url_from_require_any` + login/learning `url_to_exclude` in `vendors/workday.json`
+- optional: `myworkdayjobs.com` primary target (may shrink pool vs outage urls)
 - optional post-fetch `--strict` filter (tighter careers path on `url_from` than `url_from_require_any`)
 - snowflake load + dbt models for dedupe/enrichment
 - do **not** add `examples/` sample csvs unless user asks (they rejected this)
