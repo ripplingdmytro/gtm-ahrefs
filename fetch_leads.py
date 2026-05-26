@@ -14,7 +14,6 @@ import argparse
 import csv
 import json
 import os
-import shutil
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -148,10 +147,6 @@ def default_output_path(vendor_slug: str, run_id: str, when: datetime) -> Path:
     """
     date_folder = when.strftime("%Y-%m-%d")
     return OUT_DIR / vendor_slug / date_folder / f"{run_id}.csv"
-
-
-def latest_output_path(vendor_slug: str) -> Path:
-    return OUT_DIR / vendor_slug / "latest.csv"
 
 
 def load_api_key() -> str:
@@ -305,7 +300,6 @@ def main() -> None:
     run_id = make_run_id(when)
     fetched_at = when.strftime("%Y-%m-%dT%H:%M:%SZ")
     output_path = args.output or default_output_path(vendor_slug, run_id, when)
-    latest_path = latest_output_path(vendor_slug)
 
     order_by = vendor.get("order_by", "domain_rating_source:desc")
     print(
@@ -322,10 +316,7 @@ def main() -> None:
         fetched_at=fetched_at,
     )
     write_csv(output_path, rows)
-    shutil.copy2(output_path, latest_path)
-
     print(f"Wrote {len(rows)} rows to {output_path}")
-    print(f"Updated {latest_path}")
 
 
 if __name__ == "__main__":

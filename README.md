@@ -32,10 +32,9 @@ each run creates a new csv (old runs are kept):
 
 ```text
 out/adp-workforcenow/2026-05-26/20260526-143022.csv
-out/adp-workforcenow/latest.csv                    # most recent only
 ```
 
-load the dated files into snowflake. skip `latest.csv` for the warehouse.
+newest run: `ls -t out/adp-workforcenow/*/*.csv | head -1`
 
 ## csv columns
 
