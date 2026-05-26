@@ -56,7 +56,7 @@ newest run: `ls -t out/adp-workforcenow/*/*.csv | head -1`
 
 copy `vendors/adp-workforcenow.json` → `vendors/your-vendor.json`, edit filters, run again. it shows up in the menu automatically.
 
-**gusto** → `jobs.gusto.com/boards/…` · **deel** → `jobs.deel.com/…` (customer career sites linking to their board, not vendor’s own hiring).
+**gusto** → `jobs.gusto.com/boards/…` · **deel** → `jobs.deel.com/…` · **bamboohr** → `{company}.bamboohr.com/careers` (per-tenant subdomains, not a shared jobs host).
 
 ## cost
 
