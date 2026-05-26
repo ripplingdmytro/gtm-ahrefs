@@ -4,6 +4,8 @@ find companies that link to hr vendor career portals using the ahrefs backlinks 
 
 built for rippling gtm → technographics / snowflake. repo: https://github.com/ripplingdmytro/gtm-ahrefs
 
+**new cursor chat?** read [AGENTS.md](AGENTS.md) first for context; this file is the how-to.
+
 ## setup
 
 ```bash
