@@ -16,7 +16,9 @@ open `.env` and paste your ahrefs api key after `AHREFS_API_KEY=`
 python3 fetch_leads.py
 ```
 
-pick a vendor from the menu. default fetch = 100 companies.
+pick a vendor from the menu (largest → smallest competitor). default fetch = 100 companies.
+
+menu order: workday → adp → gusto → bamboohr → deel
 
 other useful commands:
 
@@ -54,9 +56,15 @@ newest run: `ls -t out/adp-workforcenow/*/*.csv | head -1`
 
 ## add a vendor
 
-copy `vendors/adp-workforcenow.json` → `vendors/your-vendor.json`, edit filters, run again. it shows up in the menu automatically.
+copy `vendors/adp-workforcenow.json` → `vendors/your-vendor.json`, edit filters, set `menu_order` (lower = bigger competitor, shows first). it appears in the menu automatically.
 
-**gusto** → `jobs.gusto.com/boards/…` · **deel** → `jobs.deel.com/…` · **bamboohr** → `{company}.bamboohr.com/careers` (per-tenant subdomains, not a shared jobs host).
+| vendor | signal |
+|--------|--------|
+| workday | `*.myworkday.com` |
+| adp | `workforcenow.adp.com` |
+| gusto | `jobs.gusto.com/boards/…` |
+| bamboohr | `{company}.bamboohr.com/careers` |
+| deel | `jobs.deel.com/…` |
 
 ## cost
 

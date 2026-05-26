@@ -1,6 +1,7 @@
 {
   "vendor_slug": "gusto",
   "display_name": "Gusto",
+  "menu_order": 3,
   "target": "jobs.gusto.com",
   "mode": "subdomains",
   "aggregation": "1_per_domain",

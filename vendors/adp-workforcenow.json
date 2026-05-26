@@ -1,6 +1,7 @@
 {
   "vendor_slug": "adp-workforcenow",
   "display_name": "ADP Workforce Now",
+  "menu_order": 2,
   "target": "adp.com",
   "mode": "subdomains",
   "aggregation": "1_per_domain",

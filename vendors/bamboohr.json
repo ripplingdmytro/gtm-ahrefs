@@ -1,6 +1,7 @@
 {
   "vendor_slug": "bamboohr",
   "display_name": "BambooHR",
+  "menu_order": 4,
   "target": "bamboohr.com",
   "mode": "subdomains",
   "aggregation": "1_per_domain",

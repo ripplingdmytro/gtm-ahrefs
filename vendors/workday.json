@@ -1,6 +1,7 @@
 {
   "vendor_slug": "workday",
   "display_name": "Workday",
+  "menu_order": 1,
   "target": "myworkday.com",
   "mode": "subdomains",
   "aggregation": "1_per_domain",

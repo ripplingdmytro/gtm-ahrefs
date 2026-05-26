@@ -100,14 +100,23 @@ def list_vendor_slugs() -> list[str]:
     )
 
 
+def vendors_for_menu(slugs: list[str]) -> list[tuple[str, dict[str, Any]]]:
+    """Sort vendors for menu: menu_order ascending (1 = largest competitor first)."""
+    options = [(slug, load_vendor(slug)) for slug in slugs]
+    options.sort(
+        key=lambda item: (
+            item[1].get("menu_order", 999),
+            item[1].get("display_name", item[0]).lower(),
+        )
+    )
+    return options
+
+
 def pick_vendor_interactively(slugs: list[str]) -> str:
     if not slugs:
         raise SystemExit(f"No vendor configs found in {VENDORS_DIR}/")
 
-    options: list[tuple[str, dict[str, Any]]] = [
-        (slug, load_vendor(slug)) for slug in slugs
-    ]
-    options.sort(key=lambda item: item[1].get("display_name", item[0]).lower())
+    options = vendors_for_menu(slugs)
 
     print()
     print("  Which vendor signal do you want to hunt?")
@@ -277,8 +286,7 @@ def main() -> None:
     args = parse_args(vendor_slugs)
 
     if args.list_vendors:
-        for slug in vendor_slugs:
-            cfg = json.loads((VENDORS_DIR / f"{slug}.json").read_text(encoding="utf-8"))
+        for slug, cfg in vendors_for_menu(vendor_slugs):
             print(f"{slug} — {cfg.get('display_name', slug)}")
         return
 
