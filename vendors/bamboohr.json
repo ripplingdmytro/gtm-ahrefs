@@ -8,7 +8,6 @@
   "url_to_contains": "bamboohr.com/careers",
   "domain_rating_min": 20,
   "traffic_domain_min": 1000,
-  "include_defaults": true,
   "url_to_exclude": [
     "www.bamboohr.com",
     "://bamboohr.com/",

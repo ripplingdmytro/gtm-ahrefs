@@ -58,6 +58,8 @@ newest run: `ls -t out/adp/*/*.csv | head -1`
 
 copy `vendors/adp.json` → `vendors/your-vendor.json`, edit filters, set `display_name` (menu label) and `menu_order` (lower = bigger competitor, shows first).
 
+**global ICP filters** (all vendors, in `vendors/_defaults.json` + `fetch_leads.py`): no `.edu` / `.gov` referrers (`tld_class_source=normal` + suffix rules), plus a shared blocklist (media, job boards, social, free hosts). add more tokens to `_defaults.json` → `url_from_exclude`.
+
 | vendor | signal |
 |--------|--------|
 | Workday | `*.myworkday.com` |

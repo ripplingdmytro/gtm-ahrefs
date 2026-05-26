@@ -44,8 +44,27 @@ def _not_substring(field: str, value: str) -> dict[str, Any]:
     return {"not": {"field": field, "is": ["substring", value]}}
 
 
-def build_where_filter(vendor: dict[str, Any]) -> dict[str, Any]:
+def _load_shared_defaults() -> dict[str, Any]:
+    defaults_path = VENDORS_DIR / "_defaults.json"
+    if not defaults_path.is_file():
+        return {}
+    return json.loads(defaults_path.read_text(encoding="utf-8"))
+
+
+def _icp_referrer_clauses(defaults: dict[str, Any]) -> list[dict[str, Any]]:
+    """ICP filters applied to every vendor: no .edu/.gov referrers, shared blocklist."""
     clauses: list[dict[str, Any]] = [
+        {"field": "tld_class_source", "is": ["eq", "normal"]},
+    ]
+    for suffix in defaults.get("root_name_suffix_exclude", []):
+        clauses.append(_not_substring("root_name_source", suffix))
+    return clauses
+
+
+def build_where_filter(vendor: dict[str, Any]) -> dict[str, Any]:
+    defaults = _load_shared_defaults()
+    clauses: list[dict[str, Any]] = [
+        *_icp_referrer_clauses(defaults),
         {
             "field": "url_to_plain",
             "is": ["substring", vendor["url_to_contains"]],
@@ -66,13 +85,8 @@ def build_where_filter(vendor: dict[str, Any]) -> dict[str, Any]:
     return {"and": clauses}
 
 
-def _merge_default_excludes(vendor: dict[str, Any]) -> dict[str, Any]:
-    if not vendor.get("include_defaults", False):
-        return vendor
-    defaults_path = VENDORS_DIR / "_defaults.json"
-    if not defaults_path.is_file():
-        return vendor
-    defaults = json.loads(defaults_path.read_text(encoding="utf-8"))
+def _apply_shared_defaults(vendor: dict[str, Any]) -> dict[str, Any]:
+    defaults = _load_shared_defaults()
     merged = list(defaults.get("url_from_exclude", []))
     for token in vendor.get("url_from_exclude", []):
         if token not in merged:
@@ -91,7 +105,7 @@ def load_vendor(slug: str) -> dict[str, Any]:
         raise SystemExit(
             f"vendor_slug in {path.name} must be {slug!r}, got {vendor.get('vendor_slug')!r}"
         )
-    return _merge_default_excludes(vendor)
+    return _apply_shared_defaults(vendor)
 
 
 def list_vendor_slugs() -> list[str]:
