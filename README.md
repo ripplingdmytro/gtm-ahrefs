@@ -18,7 +18,7 @@ python3 fetch_leads.py
 
 pick a vendor from the menu (largest → smallest competitor). default fetch = 100 companies.
 
-menu order: **Workday** → **ADP** → **Gusto** → **BambooHR** → **Deel**
+menu order: **Workday** → **ADP** → **Deel** → **Gusto** → **BambooHR**
 
 other useful commands:
 
@@ -62,9 +62,9 @@ copy `vendors/adp.json` → `vendors/your-vendor.json`, edit filters, set `displ
 |--------|--------|
 | Workday | `*.myworkday.com` |
 | ADP | `workforcenow.adp.com` |
+| Deel | `jobs.deel.com/…` |
 | Gusto | `jobs.gusto.com/boards/…` |
 | BambooHR | `{company}.bamboohr.com/careers` |
-| Deel | `jobs.deel.com/…` |
 
 ## cost
 

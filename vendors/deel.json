@@ -1,7 +1,7 @@
 {
   "vendor_slug": "deel",
   "display_name": "Deel",
-  "menu_order": 5,
+  "menu_order": 3,
   "target": "jobs.deel.com",
   "mode": "subdomains",
   "aggregation": "1_per_domain",
